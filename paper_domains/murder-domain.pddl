@@ -29,12 +29,12 @@
         :effect
             (and
                 (has ?police ?hannah)
-                (not (in ?hannah ?place))
-                (believes ?police (in ?hannah ?place))
-                (not (believes ?police (not (in ?hannah ?place))))
+                (not (at ?hannah ?place))
+                (believes ?police (at ?hannah ?place))
+                (not (believes ?police (not (at ?hannah ?place))))
             )
         :fail
-            (not (believes ?police (in ?hannah ?place)))
+            (not (believes ?police (at ?hannah ?place)))
         :agents (?police)
     )
 
@@ -80,7 +80,7 @@
     ;; police finding the suspect 
     ;; 
 
-    ; character - Hanna, Police, Uncle, Neighbor
+    ; character - Hannah, Police, Uncle, Neighbor
     ; place - house, parents-house, partner-house, storage-facility, neighbor-house, uncle-house
     ; thing - knife
 
