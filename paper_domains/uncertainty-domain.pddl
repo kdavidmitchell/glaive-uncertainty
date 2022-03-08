@@ -22,7 +22,17 @@
                 (believes ?character1 (at ?character2 ?place))
             )
         :effect
-            (at ?character1 ?place)
+            (and
+                (at ?character1 ?place)
+                (believes ?character1 (at ?character1 ?place))
+            )
+        :fail
+            (and
+                (not (at ?character1 ?place))
+                (believes ?character1 (not (at ?character1 ?place)))
+            )
+        :agents
+            (?character1)
     )
     
     (:action buy
@@ -32,14 +42,21 @@
                 (in ?thing ?place) 
                 (at ?buyer ?place)
                 (at ?seller ?place)
+                (has ?seller ?thing)
             )
         :effect 
             (and 
                 (has ?buyer ?thing)
                 (not (has ?seller ?thing))
             )
+        :fail
+            (and
+                (not (has ?buyer ?thing))
+                (has ?seller ?thing)
+            )
+        :agents
+            (?buyer)
     )
 
     ;; Experimental actions defined to extend belief system to handle uncertainty.
-    
 )

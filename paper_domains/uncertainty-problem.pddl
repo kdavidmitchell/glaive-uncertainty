@@ -6,26 +6,39 @@
     (:objects
         tom - character
         merchant - character
-        toms-house - place
-        merchants-house - place
+        tomshouse - place
+        merchantshouse - place
         market - place
         potion - thing
     )
     (:init
-        (in potion merchants-house)
-        (at tom toms-house)
-        (at merchant merchants-house)
+        ;; Basic truths.
+        (in potion merchantshouse)
+        (at tom tomshouse)
+        (at merchant merchantshouse)
+        (has merchant potion)
 
+        ;; Tom's beliefs.
         (believes tom (has merchant potion))
-
         (believes tom (at merchant market))
-        (believes tom (at merchant merchants-house))
+        (believes tom (at merchant merchantshouse))
+        (believes tom (at tom tomshouse))
+        (believes tom (not (at tom market)))
+        (believes tom (not (at tom merchantshouse)))
+        (believes tom (in potion market))
+        (believes tom (in potion merchantshouse))
 
+        ;; Merchant's beliefs.
+        (believes merchant (at merchant merchantshouse))
+        (believes merchant (has merchant potion))
+
+        ;; Tom's intentions.
         (intends tom (has tom potion))
     )
 
     (:goal
         (and
+
             (has tom potion)
         )
     )
