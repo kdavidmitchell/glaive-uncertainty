@@ -1,240 +1,294 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; The domain "heroes-journey", compiled for use in planners       ;;;
+;;; The domain "murder", compiled for use in planners               ;;;
 ;;;  that support intention.                                        ;;;
 ;;;                                                                 ;;;
 ;;; Compilation by Matthew Christensen and Jennifer Nelson (2020)   ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (domain heroes-journey-bompiled)
+(define (domain murder-bompiled)
     (:requirements :adl :universal-preconditions :expression-variables :intentionality :disjunctive-preconditions :negative-preconditions)
     (:types
     
-superpower existential-threat - idea
-village mountain - place
-mirror - thing
-character place idea thing
+character place thing
 
     )
     (:predicates
-        (threatening ?threat - existential-threat ?village - village)
-		(wields ?char - character ?power - superpower)
-		(dead ?char - character)
-		(has ?char - character ?thing - thing)
+        (has ?char - character ?thing - thing)
+		(in ?thing - thing ?place - place)
 		(at ?character - character ?place - place)
-		(in ?threat - existential-threat ?place - place)
-		(safe ?place - place)
-		(destroyed ?place - place)
-		(believes_not_threatening ?who - character ?threat - existential-threat ?village - village)
-		(believes_threatening ?who - character ?threat - existential-threat ?village - village)
-		(believes_not_wields ?who - character ?char - character ?power - superpower)
-		(believes_wields ?who - character ?char - character ?power - superpower)
-		(believes_not_dead ?who - character ?char - character)
-		(believes_dead ?who - character ?char - character)
+		(dead ?char - character)
+		(has-committed-murder ?murderer - character)
+		(missing ?victim - character)
+		(has-hidden-weapon ?murderer - character)
+		(has-fled-scene ?murderer - character)
+		(has-found-body ?police - character)
+		(has-found-weapon ?police - character)
+		(has-solved-murder ?police - character)
+		(is-crime-scene ?place - place)
+		(is-weapon-location ?place - place)
 		(believes_not_has ?who - character ?char - character ?thing - thing)
 		(believes_has ?who - character ?char - character ?thing - thing)
+		(believes_not_in ?who - character ?thing - thing ?place - place)
+		(believes_in ?who - character ?thing - thing ?place - place)
 		(believes_not_at ?who - character ?character - character ?place - place)
 		(believes_at ?who - character ?character - character ?place - place)
-		(believes_not_in ?who - character ?threat - existential-threat ?place - place)
-		(believes_in ?who - character ?threat - existential-threat ?place - place)
-		(believes_not_safe ?who - character ?place - place)
-		(believes_safe ?who - character ?place - place)
-		(believes_not_destroyed ?who - character ?place - place)
-		(believes_destroyed ?who - character ?place - place)
+		(believes_not_dead ?who - character ?char - character)
+		(believes_dead ?who - character ?char - character)
+		(believes_not_has-committed-murder ?who - character ?murderer - character)
+		(believes_has-committed-murder ?who - character ?murderer - character)
+		(believes_not_missing ?who - character ?victim - character)
+		(believes_missing ?who - character ?victim - character)
+		(believes_not_has-hidden-weapon ?who - character ?murderer - character)
+		(believes_has-hidden-weapon ?who - character ?murderer - character)
+		(believes_not_has-fled-scene ?who - character ?murderer - character)
+		(believes_has-fled-scene ?who - character ?murderer - character)
+		(believes_not_has-found-body ?who - character ?police - character)
+		(believes_has-found-body ?who - character ?police - character)
+		(believes_not_has-found-weapon ?who - character ?police - character)
+		(believes_has-found-weapon ?who - character ?police - character)
+		(believes_not_has-solved-murder ?who - character ?police - character)
+		(believes_has-solved-murder ?who - character ?police - character)
+		(believes_not_is-crime-scene ?who - character ?place - place)
+		(believes_is-crime-scene ?who - character ?place - place)
+		(believes_not_is-weapon-location ?who - character ?place - place)
+		(believes_is-weapon-location ?who - character ?place - place)
     )
     
-(:action threaten
-    :parameters   ( ?threat - existential-threat ?place - village ?char - character)
+(:action move-to-place_success
+    :parameters   ( ?character - character ?place - place)
     :precondition 
-		(in ?threat ?place)
+		(and  
+			(not  
+				(at ?character ?place)
+			)
+			(believes_not_at ?character ?character ?place)
+		)
     :effect
 		(and  
-			(threatening ?threat ?place)
-			(intends ?char 
-				(safe ?place)
-			)
-			(believes_threatening ?char ?threat ?place)
+			(at ?character ?place)
+			(believes_at ?character ?character ?place)
 		)    
 
 
-    
+    :agents (?character)
 )
 
 	
-(:action save_success
-    :parameters   ( ?hero - character ?power - superpower ?threat - existential-threat ?place - village)
+(:action move-to-place_fail
+    :parameters   ( ?character - character ?place - place)
     :precondition 
 		(and  
-			(wields ?hero ?power)
-			(threatening ?threat ?place)
-			(believes_wields ?hero ?hero ?power)
-			(believes_threatening ?hero ?threat ?place)
+			(at ?character ?place)
+			(believes_not_at ?character ?character ?place)
 		)
     :effect
 		(and  
 			(not  
-				(threatening ?threat ?place)
+				(at ?character ?place)
 			)
-			(not  
-				(in ?threat ?place)
-			)
-			(safe ?place)
-			(believes_not_threatening ?hero ?threat ?place)
-			(believes_not_in ?hero ?threat ?place)
-			(believes_safe ?hero ?place)
+			(believes_not_at ?character ?character ?place)
 		)    
 
 
-    :agents (?hero)
+    :agents (?character)
 )
 
 	
-(:action save_fail
-    :parameters   ( ?hero - character ?power - superpower ?threat - existential-threat ?place - village)
+(:action murder_success
+    :parameters   ( ?murderer - character ?victim - character ?place - place ?weapon - thing)
+    :precondition 
+		(and  
+			(at ?victim ?place)
+			(at ?murderer ?place)
+			(in ?weapon ?place)
+			(believes_at ?murderer ?victim ?place)
+			(believes_at ?murderer ?murderer ?place)
+			(believes_in ?murderer ?weapon ?place)
+		)
+    :effect
+		(and  
+			(dead ?victim)
+			(missing ?victim)
+			(believes_dead ?murderer ?victim)
+			(believes_dead ?victim ?victim)
+			(has-committed-murder ?murderer)
+			(has ?murderer ?weapon)
+			(is-crime-scene ?place)
+			(believes_has-committed-murder ?murderer ?murderer)
+			(believes_has ?murderer ?murderer ?weapon)
+			(believes_is-crime-scene ?murderer ?place)
+		)    
+
+
+    :agents (?murderer)
+)
+
+	
+(:action murder_fail
+    :parameters   ( ?murderer - character ?victim - character ?place - place ?weapon - thing)
     :precondition 
 		(and  
 			(or  
 				(not  
-					(wields ?hero ?power)
+					(at ?victim ?place)
 				)
 				(not  
-					(threatening ?threat ?place)
+					(at ?murderer ?place)
 				)
-			)
-			(believes_wields ?hero ?hero ?power)
-			(believes_threatening ?hero ?threat ?place)
-		)
-    :effect
-		(destroyed ?place)    
-
-
-    :agents (?hero)
-)
-
-	
-(:action visit_success
-    :parameters   ( ?hero - character ?src - place ?mentor - character ?dest - place)
-    :precondition 
-		(and  
-			(at ?hero ?src)
-			(at ?mentor ?dest)
-			(believes_at ?hero ?hero ?src)
-			(believes_at ?hero ?mentor ?dest)
-		)
-    :effect
-		(and  
-			(not  
-				(at ?hero ?src)
-			)
-			(at ?hero ?dest)
-			(intends ?mentor 
 				(not  
-					(at ?hero ?dest)
+					(in ?weapon ?place)
 				)
 			)
-			(believes_at ?hero ?hero ?dest)
-			(believes_at ?mentor ?hero ?dest)
-			(believes_not_at ?hero ?hero ?src)
-			(not  
-				(believes_at ?hero ?hero ?src)
-			)
+			(believes_at ?murderer ?victim ?place)
+			(believes_at ?murderer ?murderer ?place)
+			(believes_in ?murderer ?weapon ?place)
+		)
+    :effect
+		(not  
+			(dead ?victim)
 		)    
 
 
-    :agents (?hero)
+    :agents (?murderer)
 )
 
 	
-(:action visit_fail
-    :parameters   ( ?hero - character ?src - place ?mentor - character ?dest - place)
+(:action hide-the-murder-weapon_success
+    :parameters   ( ?murderer - character ?weapon - thing ?place - place)
+    :precondition 
+		(and  
+			(has-committed-murder ?murderer)
+			(has ?murderer ?weapon)
+			(not  
+				(is-crime-scene ?place)
+			)
+			(at ?murderer ?place)
+			(believes_has-committed-murder ?murderer ?murderer)
+			(believes_has ?murderer ?murderer ?weapon)
+			(believes_not_is-crime-scene ?murderer ?place)
+			(believes_at ?murderer ?murderer ?place)
+		)
+    :effect
+		(and  
+			(in ?weapon ?place)
+			(not  
+				(has ?murderer ?weapon)
+			)
+			(has-hidden-weapon ?murderer)
+			(is-weapon-location ?place)
+			(believes_at ?murderer ?murderer ?place)
+			(believes_in ?murderer ?weapon ?place)
+			(believes_not_has ?murderer ?murderer ?weapon)
+			(believes_has-hidden-weapon ?murderer ?murderer)
+			(believes_is-weapon-location ?murderer ?place)
+		)    
+
+
+    :agents (?murderer)
+)
+
+	
+(:action hide-the-murder-weapon_fail
+    :parameters   ( ?murderer - character ?weapon - thing ?place - place)
     :precondition 
 		(and  
 			(or  
 				(not  
-					(at ?hero ?src)
+					(has-committed-murder ?murderer)
 				)
 				(not  
-					(at ?mentor ?dest)
+					(has ?murderer ?weapon)
+				)
+				(is-crime-scene ?place)
+				(not  
+					(at ?murderer ?place)
 				)
 			)
-			(believes_at ?hero ?hero ?src)
-			(believes_at ?hero ?mentor ?dest)
+			(believes_has-committed-murder ?murderer ?murderer)
+			(believes_has ?murderer ?murderer ?weapon)
+			(believes_not_is-crime-scene ?murderer ?place)
+			(believes_at ?murderer ?murderer ?place)
 		)
     :effect
 		(and  
+			(has ?murderer ?weapon)
 			(not  
-				(at ?hero ?src)
-			)
-			(at ?hero ?dest)
-			(believes_at ?hero ?hero ?dest)
-			(believes_not_at ?hero ?hero ?src)
-			(not  
-				(believes_at ?hero ?hero ?src)
+				(has-hidden-weapon ?murderer)
 			)
 		)    
 
 
-    :agents (?hero)
+    :agents (?murderer)
 )
 
 	
-(:action teach_success
-    :parameters   ( ?teacher - character ?student - character ?power - superpower ?place - place)
+(:action flee-scene_success
+    :parameters   ( ?murderer - character ?place1 - place ?place2 - place)
     :precondition 
 		(and  
-			(at ?teacher ?place)
-			(believes_at ?teacher ?teacher ?place)
-			(believes_at ?student ?teacher ?place)
-		)
-    :effect
-		(believes_wields ?student ?student ?power)    
-
-
-    :agents (?teacher ?student)
-)
-
-	
-(:action teach_fail
-    :parameters   ( ?teacher - character ?student - character ?power - superpower ?place - place)
-    :precondition 
-		(and  
+			(has-committed-murder ?murderer)
+			(has-hidden-weapon ?murderer)
+			(at ?murderer ?place1)
 			(not  
-				(at ?teacher ?place)
+				(is-crime-scene ?place2)
 			)
-			(believes_at ?teacher ?teacher ?place)
-			(believes_at ?student ?teacher ?place)
-		)
-    :effect
-		(believes_not_wields ?student ?student ?power)    
-
-
-    :agents (?teacher ?student)
-)
-
-	
-(:action remove-to_success
-    :parameters   ( ?teacher - character ?student - character ?src - place ?dest - place)
-    :precondition 
-		(and  
-			(at ?teacher ?src)
-			(at ?student ?src)
-			(believes_at ?teacher ?teacher ?src)
-			(believes_at ?teacher ?student ?src)
+			(not  
+				(is-weapon-location ?place2)
+			)
+			(believes_has-committed-murder ?murderer ?murderer)
+			(believes_has-hidden-weapon ?murderer ?murderer)
+			(believes_at ?murderer ?murderer ?place1)
+			(believes_not_is-crime-scene ?murderer ?place2)
+			(believes_not_is-weapon-location ?murderer ?place2)
 		)
     :effect
 		(and  
 			(not  
-				(at ?student ?src)
+				(at ?murderer ?place1)
 			)
-			(at ?student ?dest)
-			(believes_not_at ?student ?student ?src)
-			(believes_at ?student ?student ?dest)
-			(believes_not_at ?teacher ?student ?src)
-			(believes_at ?teacher ?student ?dest)
+			(at ?murderer ?place2)
+			(has-fled-scene ?murderer)
+			(believes_not_at ?murderer ?murderer ?place1)
+			(believes_at ?murderer ?murderer ?place2)
+			(believes_has-fled-scene ?murderer ?murderer)
 		)    
 
 
-    :agents (?teacher)
+    :agents (?murderer)
+)
+
+	
+(:action flee-scene_fail
+    :parameters   ( ?murderer - character ?place1 - place ?place2 - place)
+    :precondition 
+		(and  
+			(or  
+				(not  
+					(has-committed-murder ?murderer)
+				)
+				(not  
+					(has-hidden-weapon ?murderer)
+				)
+				(not  
+					(at ?murderer ?place1)
+				)
+				(is-crime-scene ?place2)
+				(is-weapon-location ?place2)
+			)
+			(believes_has-committed-murder ?murderer ?murderer)
+			(believes_has-hidden-weapon ?murderer ?murderer)
+			(believes_at ?murderer ?murderer ?place1)
+			(believes_not_is-crime-scene ?murderer ?place2)
+			(believes_not_is-weapon-location ?murderer ?place2)
+		)
+    :effect
+		(not  
+			(has-fled-scene ?murderer)
+		)    
+
+
+    :agents (?murderer)
 )
 
 )

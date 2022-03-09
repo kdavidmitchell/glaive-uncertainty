@@ -16,38 +16,64 @@
         knife - thing
     )
     (:init
+        ;; Set up location properties explicitly.
+        (not (is-crime-scene hannah-house))
+        (not (is-crime-scene uncle-house))
+        (not (is-crime-scene neighbor-house))
+        (not (is-crime-scene partner-house))
+        (not (is-crime-scene storage-facility))
+        (not (is-weapon-location hannah-house))
+        (not (is-weapon-location uncle-house))
+        (not (is-weapon-location neighbor-house))
+        (not (is-weapon-location partner-house))
+        (not (is-weapon-location storage-facility))
+
+        ;; Set up neighbor's beliefs about location properties explicitly.
+        (believes neighbor (not (at neighbor hannah-house)))
+        (believes neighbor (not (at neighbor uncle-house)))
+        (believes neighbor (not (at neighbor partner-house)))
+        (believes neighbor (not (at neighbor storage-facility)))
+        (believes neighbor (not (is-crime-scene hannah-house)))
+        (believes neighbor (not (is-crime-scene uncle-house)))
+        (believes neighbor (not (is-crime-scene neighbor-house)))
+        (believes neighbor (not (is-crime-scene partner-house)))
+        (believes neighbor (not (is-crime-scene storage-facility)))
+        (believes neighbor (not (is-weapon-location hannah-house)))
+        (believes neighbor (not (is-weapon-location uncle-house)))
+        (believes neighbor (not (is-weapon-location neighbor-house)))
+        (believes neighbor (not (is-weapon-location partner-house)))
+        (believes neighbor (not (is-weapon-location storage-facility)))
+
         ;; Basic truths.
-        (not (dead hannah))
         (at hannah neighbor-house)
-        (not (at  hannah hannah-house))
-        (not (at  hannah uncle-house))
-        (not (at  hannah partner-house))
-        (not (at  hannah storage-facility))
-        (in neighbor-house knife)
+        (at neighbor neighbor-house)
+        (in knife neighbor-house)
 
-        ;; Police's beliefs
-        (believes police not(dead hannah))
-        (believes police (at  hannah hannah-house))
-        (believes police (at  hannah uncle-house))
-        (believes police (at  hannah partner-house))
-        (believes police (at  hannah storage-facility))
-        (believes police (at  hannah neighbor-house))
-        (believes police (in  knife hannah-house))
-        (believes police (in  knife uncle-house))
-        (believes police (in  knife partner-house))
-        (believes police (in  knife storage-facility))
-        (believes police (in  knife neighbor-house))
+        ;; Murderer specific beliefs.
+        (believes neighbor (at neighbor neighbor-house))
+        (believes neighbor (in knife neighbor-house))
+        (believes neighbor (at hannah neighbor-house))
 
+        ;; Murderer specific intentions: commit the murder, hide the weapon, flee the scene.
+        (intends neighbor (dead hannah))
+        (intends neighbor (has-hidden-weapon neighbor))
+        (intends neighbor (has-fled-scene neighbor))
 
-        ;; ??? what to put for intention?
-        (intends police (has police hannah))
+        ;; Police specific beliefs.
+        
+        ;; Police specific intentions: find the missing person (body), find the weapon, nab the suspect, solve the murder.
+        (intends police (has-found-body police))
+        (intends police (has-found-weapon police))
+        (intends police (has-solved-murder police))
     )
 
+    ;; Goals: Have the murderer commit the murder, hide the weapon, flee the scene. Police find the body, weapon, suspect,
+    ;; and solve the murder.
     (:goal
         (and
-            (dead hannah)
-            (has neighbor knife)
-            
+            (has-committed-murder neighbor)
+            (has-hidden-weapon neighbor)
+            (has-fled-scene neighbor)
         )
     )
 )
