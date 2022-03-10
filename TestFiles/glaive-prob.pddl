@@ -12,6 +12,7 @@ uncle-house - place
 neighbor-house - place
 partner-house - place
 storage-facility - place
+police-station - place
 knife - thing
 
     )
@@ -43,12 +44,28 @@ knife - thing
 	(at hannah neighbor-house)
 	(at neighbor neighbor-house)
 	(in knife neighbor-house)
+	(at police police-station)
+	(not (at police hannah-house))
+	(not (at police uncle-house))
+	(not (at police neighbor-house))
+	(not (at police partner-house))
+	(not (at police storage-facility))
+	(not (at neighbor hannah-house))
+	(not (at neighbor uncle-house))
+	(not (at neighbor partner-house))
+	(not (at neighbor storage-facility))
 	(believes_at neighbor neighbor neighbor-house)
 	(believes_in neighbor knife neighbor-house)
 	(believes_at neighbor hannah neighbor-house)
 	(intends neighbor (dead hannah))
 	(intends neighbor (has-hidden-weapon neighbor))
 	(intends neighbor (has-fled-scene neighbor))
+	(believes_at police police police-station)
+	(believes_not_at police police hannah-house)
+	(believes_not_at police police uncle-house)
+	(believes_not_at police police neighbor-house)
+	(believes_not_at police police partner-house)
+	(believes_not_at police police storage-facility)
 	(intends police (has-found-body police))
 	(intends police (has-found-weapon police))
 	(intends police (has-solved-murder police))
@@ -58,6 +75,9 @@ knife - thing
 			(has-committed-murder neighbor)
 			(has-hidden-weapon neighbor)
 			(has-fled-scene neighbor)
+			(has-found-body police)
+			(has-found-weapon police)
+			(has-solved-murder police)
 		)
     )
 )

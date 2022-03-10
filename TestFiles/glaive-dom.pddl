@@ -55,19 +55,31 @@ character place thing
 		(believes_is-weapon-location ?who - character ?place - place)
     )
     
-(:action move-to-place_success
-    :parameters   ( ?character - character ?place - place)
+(:action move-from-place-to-place_success
+    :parameters   ( ?character - character ?place1 - place ?place2 - place)
     :precondition 
 		(and  
+			(at ?character ?place1)
 			(not  
-				(at ?character ?place)
+				(at ?character ?place2)
 			)
-			(believes_not_at ?character ?character ?place)
+			(believes_at ?character ?character ?place1)
+			(believes_not_at ?character ?character ?place2)
 		)
     :effect
 		(and  
-			(at ?character ?place)
-			(believes_at ?character ?character ?place)
+			(at ?character ?place2)
+			(not  
+				(at ?character ?place1)
+			)
+			(believes_at ?character ?character ?place2)
+			(not  
+				(believes_not_at ?character ?character ?place2)
+			)
+			(believes_not_at ?character ?character ?place1)
+			(not  
+				(believes_at ?character ?character ?place1)
+			)
 		)    
 
 
@@ -75,19 +87,25 @@ character place thing
 )
 
 	
-(:action move-to-place_fail
-    :parameters   ( ?character - character ?place - place)
+(:action move-from-place-to-place_fail
+    :parameters   ( ?character - character ?place1 - place ?place2 - place)
     :precondition 
 		(and  
-			(at ?character ?place)
-			(believes_not_at ?character ?character ?place)
+			(or  
+				(not  
+					(at ?character ?place1)
+				)
+				(at ?character ?place2)
+			)
+			(believes_at ?character ?character ?place1)
+			(believes_not_at ?character ?character ?place2)
 		)
     :effect
 		(and  
 			(not  
-				(at ?character ?place)
+				(at ?character ?place2)
 			)
-			(believes_not_at ?character ?character ?place)
+			(believes_not_at ?character ?character ?place2)
 		)    
 
 
@@ -110,6 +128,10 @@ character place thing
 		(and  
 			(dead ?victim)
 			(missing ?victim)
+			(forall  
+				(?char - character)
+				(believes_missing ?char ?victim)
+			)
 			(believes_dead ?murderer ?victim)
 			(believes_dead ?victim ?victim)
 			(has-committed-murder ?murderer)
@@ -182,6 +204,13 @@ character place thing
 			(believes_not_has ?murderer ?murderer ?weapon)
 			(believes_has-hidden-weapon ?murderer ?murderer)
 			(believes_is-weapon-location ?murderer ?place)
+			(forall  
+				(?place2 - place)
+				(forall  
+					(?char - character)
+					(believes_is-weapon-location ?char ?place2)
+				)
+			)
 		)    
 
 
@@ -289,6 +318,196 @@ character place thing
 
 
     :agents (?murderer)
+)
+
+	
+(:action search-for-victim-in-place_success
+    :parameters   ( ?police - character ?victim - character ?place - place)
+    :precondition 
+		(and  
+			(missing ?victim)
+			(at ?police ?place)
+			(believes_missing ?police ?victim)
+			(believes_at ?police ?police ?place)
+		)
+    :effect
+		(when  
+			(is-crime-scene ?place)
+			(and  
+				(has-found-body ?police)
+				(believes_has-found-body ?police ?police)
+			)
+		)    
+
+
+    :agents (?police)
+)
+
+	
+(:action search-for-victim-in-place_fail
+    :parameters   ( ?police - character ?victim - character ?place - place)
+    :precondition 
+		(and  
+			(or  
+				(not  
+					(missing ?victim)
+				)
+				(not  
+					(at ?police ?place)
+				)
+			)
+			(believes_missing ?police ?victim)
+			(believes_at ?police ?police ?place)
+		)
+    :effect
+		(and  
+			(not  
+				(has-found-body ?police)
+			)
+			(believes_not_has-found-body ?police ?police)
+		)    
+
+
+    :agents (?police)
+)
+
+	
+(:action search-for-weapon_success
+    :parameters   ( ?police - character ?weapon - thing ?place - place)
+    :precondition 
+		(and  
+			(at ?police ?place)
+			(believes_is-weapon-location ?police ?place)
+			(believes_at ?police ?police ?place)
+		)
+    :effect
+		(when  
+			(is-weapon-location ?place)
+			(and  
+				(has ?police ?weapon)
+				(not  
+					(in ?weapon ?place)
+				)
+				(has-found-weapon ?police)
+				(believes_has ?police ?police ?weapon)
+				(believes_not_in ?police ?weapon ?place)
+				(believes_has-found-weapon ?police ?police)
+			)
+		)    
+
+
+    :agents (?police)
+)
+
+	
+(:action search-for-weapon_fail
+    :parameters   ( ?police - character ?weapon - thing ?place - place)
+    :precondition 
+		(and  
+			(or  
+				(not  
+					(at ?police ?place)
+				)
+				(not  
+					(believes_is-weapon-location ?police ?place)
+				)
+			)
+			(believes_at ?police ?police ?place)
+		)
+    :effect
+		(and  
+			(not  
+				(in ?weapon ?place)
+			)
+			(not  
+				(has-found-weapon ?police)
+			)
+			(believes_not_in ?police ?weapon ?place)
+			(believes_not_has-found-weapon ?police ?police)
+		)    
+
+
+    :agents (?police)
+)
+
+	
+(:action suspect_success
+    :parameters   ( ?police - character ?suspect - character)
+    :precondition 
+		(and  
+			(has-found-body ?police)
+			(has-found-weapon ?police)
+			(believes_has-found-body ?police ?police)
+			(believes_has-found-weapon ?police ?police)
+		)
+    :effect
+		(believes_has-committed-murder ?police ?suspect)    
+
+
+    :agents (?police)
+)
+
+	
+(:action suspect_fail
+    :parameters   ( ?police - character ?suspect - character)
+    :precondition 
+		(and  
+			(or  
+				(not  
+					(has-found-body ?police)
+				)
+				(not  
+					(has-found-weapon ?police)
+				)
+			)
+			(believes_has-found-body ?police ?police)
+			(believes_has-found-weapon ?police ?police)
+		)
+    :effect
+		(believes_not_has-committed-murder ?police ?suspect)    
+
+
+    :agents (?police)
+)
+
+	
+(:action solve-the-murder_success
+    :parameters   ( ?police - character ?suspect - character)
+    :precondition 
+		(and  
+			(believes_has-committed-murder ?police ?suspect)
+			(has-committed-murder ?suspect)
+			(believes_has-committed-murder ?police ?suspect)
+		)
+    :effect
+		(has-solved-murder ?police)    
+
+
+    :agents (?police)
+)
+
+	
+(:action solve-the-murder_fail
+    :parameters   ( ?police - character ?suspect - character)
+    :precondition 
+		(and  
+			(or  
+				(not  
+					(believes_has-committed-murder ?police ?suspect)
+				)
+				(not  
+					(has-committed-murder ?suspect)
+				)
+			)
+			(believes_has-committed-murder ?police ?suspect)
+		)
+    :effect
+		(not  
+			(has-solved-murder ?police)
+		)    
+
+
+    :agents (?police)
 )
 
 )

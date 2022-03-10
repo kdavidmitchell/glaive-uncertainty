@@ -13,6 +13,7 @@
         neighbor-house - place
         partner-house - place
         storage-facility - place
+        police-station - place
         knife - thing
     )
     (:init
@@ -48,6 +49,16 @@
         (at hannah neighbor-house)
         (at neighbor neighbor-house)
         (in knife neighbor-house)
+        (at police police-station)
+        (not (at police hannah-house))
+        (not (at police uncle-house))
+        (not (at police neighbor-house))
+        (not (at police partner-house))
+        (not (at police storage-facility))
+        (not (at neighbor hannah-house))
+        (not (at neighbor uncle-house))
+        (not (at neighbor partner-house))
+        (not (at neighbor storage-facility))
 
         ;; Murderer specific beliefs.
         (believes neighbor (at neighbor neighbor-house))
@@ -60,20 +71,28 @@
         (intends neighbor (has-fled-scene neighbor))
 
         ;; Police specific beliefs.
+        (believes police (at police police-station))
+        (believes police (not (at police hannah-house)))
+        (believes police (not (at police uncle-house)))
+        (believes police (not (at police neighbor-house)))
+        (believes police (not (at police partner-house)))
+        (believes police (not (at police storage-facility)))
         
-        ;; Police specific intentions: find the missing person (body), find the weapon, nab the suspect, solve the murder.
+        ;; Police specific intentions: find the missing person (body), find the weapon, solve the murder.
         (intends police (has-found-body police))
         (intends police (has-found-weapon police))
         (intends police (has-solved-murder police))
     )
 
-    ;; Goals: Have the murderer commit the murder, hide the weapon, flee the scene. Police find the body, weapon, suspect,
-    ;; and solve the murder.
+    ;; Goals: Have the murderer commit the murder, hide the weapon, flee the scene. Police gather evidence and solve the murder.
     (:goal
         (and
             (has-committed-murder neighbor)
             (has-hidden-weapon neighbor)
             (has-fled-scene neighbor)
+            (has-found-body police)
+            (has-found-weapon police)
+            (has-solved-murder police)
         )
     )
 )
